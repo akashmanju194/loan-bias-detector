@@ -162,6 +162,20 @@ def analyze(df, col):
 
     return stats_df, di, p, explanation, rec
 
+def plot_clean_bar(stats_df, col):
+    fig, ax = plt.subplots(figsize=(12, 5))
+
+    stats_df = stats_df.sort_values(by="rate", ascending=False)
+
+    ax.bar(stats_df[col], stats_df["rate"])
+
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+
+    ax.set_title(f"{col} Approval Rate")
+    ax.set_ylabel("Approval Rate")
+
+    return fig
 # =============================================================================
 # RUN ANALYSIS
 # =============================================================================
@@ -185,9 +199,7 @@ for col, (stats_df, di, p, explanation, rec) in results.items():
 
     st.subheader(col)
 
-    fig, ax = plt.subplots()
-    ax.bar(stats_df[col], stats_df["rate"])
-    ax.set_title(f"{col} Approval Rate")
+    fig = plot_clean_bar(stats_df, col)
     st.pyplot(fig)
     plt.close()
 
