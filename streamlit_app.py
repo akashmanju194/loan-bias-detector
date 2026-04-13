@@ -106,33 +106,47 @@ col3.metric("Rejected", total - approved)
 # VISUALIZATION (UPDATED FOR READABILITY)
 # =============================================================================
 
+# =============================================================================
+# VISUALIZATION (FIXED LABELS & OUTLIERS)
+# =============================================================================
+
 import matplotlib.ticker as ticker
 
-fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+# Create a figure with two subplots
+fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-# 1. Credit Score Histogram
-axes[0].hist(df["Credit Score"], bins=30, color='#3498db', edgecolor='white')
-axes[0].axvline(threshold, color='red', linestyle='--', label=f'Threshold: {threshold}')
-axes[0].set_title("Distribution of Credit Scores")
-axes[0].set_xlabel("Credit Score")
-axes[0].set_ylabel("Number of Applicants")
+# --- PLOT 1: CREDIT SCORE ---
+axes[0].hist(df["Credit Score"], bins=30, color='#3498db', edgecolor='white', alpha=0.8)
+axes[0].axvline(threshold, color='red', linestyle='--', linewidth=2, label=f'Approval Cutoff: {threshold}')
 
-# Remove scientific notation and add commas to Y-axis
+axes[0].set_title("Distribution of Credit Scores", fontsize=14, pad=15)
+axes[0].set_xlabel("Credit Score (Points)", fontsize=12)
+axes[0].set_ylabel("Number of Applicants (Count)", fontsize=12)
+axes[0].legend()
+
+# Format axes (Commas, No Scientific Notation)
 axes[0].yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
 axes[0].xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
 
-# 2. Annual Income Histogram (Scaled to Thousands)
-# We divide by 1000 to make the X-axis much cleaner
-axes[1].hist(df["Annual Income"] / 1000, bins=30, color='#2ecc71', edgecolor='white')
-axes[1].set_title("Distribution of Annual Income")
-axes[1].set_xlabel("Annual Income (in $1,000s)")
-axes[1].set_ylabel("Number of Applicants")
 
-# Remove scientific notation and add commas to Y-axis
+# --- PLOT 2: ANNUAL INCOME (ZOOMED TO REMOVE EMPTY SPACE) ---
+# Calculate 98th percentile to ignore extreme outliers that make the graph look empty
+income_limit = df["Annual Income"].quantile(0.98) / 1000 
+
+axes[1].hist(df["Annual Income"] / 1000, bins=50, color='#2ecc71', edgecolor='white', alpha=0.8)
+
+# Set the X-limit to "zoom in" on the majority of data
+axes[1].set_xlim(0, income_limit) 
+
+axes[1].set_title("Distribution of Annual Income (Majority)", fontsize=14, pad=15)
+axes[1].set_xlabel("Annual Income (in $1,000s)", fontsize=12)
+axes[1].set_ylabel("Number of Applicants (Count)", fontsize=12)
+
+# Format axes (Commas, No Scientific Notation)
 axes[1].yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
 axes[1].xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
 
-# Automatically adjust layout to prevent label clipping/overlapping
+# Adjust layout to prevent overlap
 plt.tight_layout()
 
 st.pyplot(fig)
