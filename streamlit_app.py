@@ -51,7 +51,7 @@ if not gemini_available:
 # FILE UPLOAD
 # =============================================================================
 
-uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])     
 
 if uploaded_file is None:
     st.info("Please upload a dataset to begin.")
@@ -62,8 +62,8 @@ if uploaded_file is None:
 # =============================================================================
 
 @st.cache_data
-def load_data(file):
-    df = pd.read_csv(file)
+def load_data(file):        #caches the result for fast performance
+    df = pd.read_csv(file)  #load the dataset
 
     # Basic cleaning
     df["Purpose"] = df["Purpose"].str.strip().str.title()
@@ -102,18 +102,41 @@ col3.metric("Rejected", total - approved)
 # VISUALIZATION
 # =============================================================================
 
-fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+# =============================================================================
+# VISUALIZATION (UPDATED FOR READABILITY)
+# =============================================================================
 
-axes[0].hist(df["Credit Score"], bins=30)
-axes[0].axvline(threshold)
-axes[0].set_title("Credit Score")
+import matplotlib.ticker as ticker
 
-axes[1].hist(df["Annual Income"], bins=30)
-axes[1].set_title("Income")
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+# 1. Credit Score Histogram
+axes[0].hist(df["Credit Score"], bins=30, color='#3498db', edgecolor='white')
+axes[0].axvline(threshold, color='red', linestyle='--', label=f'Threshold: {threshold}')
+axes[0].set_title("Distribution of Credit Scores")
+axes[0].set_xlabel("Credit Score")
+axes[0].set_ylabel("Number of Applicants")
+
+# Remove scientific notation and add commas to Y-axis
+axes[0].yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
+axes[0].xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
+
+# 2. Annual Income Histogram (Scaled to Thousands)
+# We divide by 1000 to make the X-axis much cleaner
+axes[1].hist(df["Annual Income"] / 1000, bins=30, color='#2ecc71', edgecolor='white')
+axes[1].set_title("Distribution of Annual Income")
+axes[1].set_xlabel("Annual Income (in $1,000s)")
+axes[1].set_ylabel("Number of Applicants")
+
+# Remove scientific notation and add commas to Y-axis
+axes[1].yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
+axes[1].xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
+
+# Automatically adjust layout to prevent label clipping/overlapping
+plt.tight_layout()
 
 st.pyplot(fig)
 plt.close()
-
 # =============================================================================
 # AI FUNCTION
 # =============================================================================
